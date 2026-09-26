@@ -1,0 +1,17 @@
+title: "핫'도그' ૮ • ﻌ - ა ⋆ﾟ ₊°"
+title_en: "HOT 'DOG' ૮ • ﻌ - ა ⋆ﾟ ₊°"
+developer: "gamzuha"
+release: 2026-09-26
+price: 3000
+discount: 50
+play_url: "https://gammja17.github.io/HotDog/"
+repo: "https://github.com/Gammja17/HotDog"
+version: "1.0.0"
+tags: ["캐주얼", "요리", "1인칭", "숨은 그림 및 물체"]
+short: "핫도그로 변장한 강아지 vs 1인칭 핫도그 트럭 사장님. 들키면 먹힌다! 친구와 온라인으로 즐기는 숨바꼭질"
+controls: "셰프: 마우스 둘러보기(화면 클릭, Esc 풀기), WASD 걷기, Space 행동(조리/진열/판매/집게), E \"누가 착한 아이지~?\" / 강아지: WASD 이동, Space 변장/나오기, E 먹기(숨었을 땐 연타로 꼬리 참기), Q 짖기"
+ai_tools: ["Claude Code"]
+dev_period: "3일"
+ai_note: "코드와 기획은 Claude Code와 함께 만들었어요. 3D 모델은 Kenney·Quaternius의 CC0 에셋, 효과음은 BigSoundBank의 CC0 실제 녹음과 Kenney 효과음, 글꼴은 도현(OFL)을 썼어요. 온라인은 서버 없이 브라우저끼리 WebRTC로 연결해요."
+engine: "Godot 4.7 (Compatibility, Web)"
+updated: "2026-09-26T18:44:32.172Z"
