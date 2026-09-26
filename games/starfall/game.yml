@@ -1,8 +1,8 @@
-title: "STARFALL"
-title_en: "STARFALL"
+title: "OVERRIDE"
+title_en: "OVERRIDE"
 developer: "gamzuha"
 release: 2026-09-26
-price: 13900
+price: 13500
 discount: 20
 play_url: "https://gammja17.github.io/merge-defense/"
 repo: "https://github.com/Gammja17/merge-defense"
@@ -14,4 +14,4 @@ ai_tools: ["Claude Code"]
 dev_period: "1일"
 ai_note: "진짜 잘만든거같음 유행하는 모든걸 넣었다"
 engine: "HTML/JavaScript (Canvas 2D)"
-updated: "2026-09-26T19:57:23.238Z"
+updated: "2026-09-26T20:01:14.311Z"
