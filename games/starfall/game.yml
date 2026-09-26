@@ -1,0 +1,17 @@
+title: "STARFALL"
+title_en: "STARFALL"
+developer: "gamzuha"
+release: 2026-09-26
+price: 13900
+discount: 20
+play_url: "https://gammja17.github.io/merge-defense/"
+repo: "https://github.com/Gammja17/merge-defense"
+version: "1.0.0"
+tags: ["타워 디펜스", "실시간 전략", "공상과학 및 사이버펑크", "우주", "캐주얼", "로그라이크 및 로그라이트"]
+short: "☆★진짜 갓겜★☆ 타워디펜스 + 머지 + 로그라이크 3종 집합 SF 캐주얼 게임"
+controls: "마우스 클릭·드래그(모바일은 터치), 우클릭 또는 꾹 누르기로 기체 정보"
+ai_tools: ["Claude Code"]
+dev_period: "1일"
+ai_note: "진짜 잘만든거같음 유행하는 모든걸 넣었다"
+engine: "HTML/JavaScript (Canvas 2D)"
+updated: "2026-09-26T19:57:23.238Z"
