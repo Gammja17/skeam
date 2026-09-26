@@ -12,3 +12,49 @@ ai_tools: ["Claude Code"]
 dev_period: "1일"
 engine: "Godot 4.7 (Compatibility, Web)"
 updated: "2026-09-26T20:21:19.217Z"
+achievements:
+  # 창구 일
+  - id: tut_done
+    name: "수습 딱지"
+    desc: "연습 창구를 끝까지 마치세요"
+  - id: first_process
+    name: "첫 도장"
+    desc: "민원 서류를 규정대로 처리하세요"
+  - id: sharp_eye
+    name: "매의 눈"
+    desc: "돋보기로 서로 안 맞는 두 곳을 찾아내세요"
+  - id: right_dept
+    name: "길 잃은 민원 없음"
+    desc: "우리 창구 일이 아닌 민원인을 알맞은 부서로 안내하세요"
+  - id: calm_down
+    name: "먹금의 달인"
+    desc: "소리부터 지르는 민원인을 대꾸 없이 진정시키세요"
+  # 이야기
+  - id: dalsu_served
+    name: "박달수 할아버지"
+    desc: "창구에서 호통치던 박달수 씨의 등본을 끝까지 떼 드리세요"
+  - id: scam_caught
+    name: "인감 도둑"
+    desc: "훔친 인감으로 꾸민 위임장을 들고 온 사람을 붙잡으세요"
+  - id: envelope_refused
+    name: "청렴 공무원"
+    desc: "창구에 슬쩍 놓인 봉투를 거절하세요"
+  - id: audit_pass
+    name: "몰래 온 감사관"
+    desc: "마감이 급하다며 위임장 없이 부탁하는 민원도 규정대로 거절하세요"
+  - id: taemin_caught
+    name: "위조 신분증"
+    desc: "전산 사진과 얼굴이 다른 위조 신분증을 잡아내세요"
+  - id: councilor_refused
+    name: "의원님도 규정대로"
+    desc: "구의원의 부탁을 규정대로 거절하세요"
+  # 엔딩
+  - id: two_weeks
+    name: "2주 완주"
+    desc: "마지막 날까지 3번 창구를 지키세요"
+  - id: grade_s
+    name: "이달의 친절 공무원"
+    desc: "인사 평가에서 S를 받으세요"
+  - id: fired
+    name: "명패를 떼다"
+    desc: "봉투를 받았다가 파면당하세요"
