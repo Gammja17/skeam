@@ -15,3 +15,46 @@ dev_period: "3일"
 ai_note: "코드와 기획은 Claude Code와 함께 만들었어요. 3D 모델은 Kenney·Quaternius의 CC0 에셋, 효과음은 BigSoundBank의 CC0 실제 녹음과 Kenney 효과음, 글꼴은 도현(OFL)을 썼어요. 온라인은 서버 없이 브라우저끼리 WebRTC로 연결해요."
 engine: "Godot 4.7 (Compatibility, Web)"
 updated: "2026-09-26T18:44:32.172Z"
+achievements:
+  - id: first_sale
+    name: "개업 첫 손님"
+    desc: "셰프로 핫도그를 처음 파세요"
+  - id: perfect_cook
+    name: "불 조절의 달인"
+    desc: "바늘이 초록 칸일 때 눌러 소시지를 뒤집으세요"
+  - id: caught_dog
+    name: "잡았다 요놈!"
+    desc: "집게로 강아지를 잡으세요"
+  - id: chef_win
+    name: "오늘 장사 끝"
+    desc: "3분 안에 핫도그 10개를 팔아 셰프로 이기세요"
+  - id: chef_flawless
+    name: "별점 만점 영업"
+    desc: "별점 5개 그대로 셰프로 이기세요"
+  - id: first_bite
+    name: "첫 한 입"
+    desc: "강아지로 소시지를 처음 먹으세요"
+  - id: rack_hide
+    name: "진열대 속 핫도그"
+    desc: "진열대 빈칸에 핫도그로 변장해 숨으세요"
+  - id: steal
+    name: "손님 핫도그 강탈"
+    desc: "장터 테이블 손님의 핫도그를 뺏어 먹으세요"
+  - id: bark_scare
+    name: "왈!"
+    desc: "짖어서 줄 선 손님을 쫓아내세요"
+  - id: dog_full
+    name: "배부른 강아지"
+    desc: "소시지 5개를 먹고 강아지로 이기세요"
+  - id: dog_sabotage
+    name: "오늘 장사 망했다"
+    desc: "사장님이 목표를 못 채우게 해서 강아지로 이기세요"
+  - id: tut_chef
+    name: "수습 셰프"
+    desc: "셰프 연습을 끝까지 해내세요"
+  - id: tut_dog
+    name: "수습 강아지"
+    desc: "강아지 연습을 끝까지 해내세요"
+  - id: online
+    name: "친구랑 한 판"
+    desc: "온라인으로 친구와 한 판을 끝까지 하세요"
