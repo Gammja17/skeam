@@ -4,6 +4,7 @@ import { Loading, Modal, toast } from '../components/ui'
 import { useGame } from '../data/api'
 import { hours } from '../format'
 import { useCloudSync, type CloudConflict, type CloudStatus } from '../state/cloud'
+import { motionOn } from '../state/motion'
 import { addPlaytime, markLaunched, unlockAchievement, useStore } from '../state/store'
 
 const TICK = 15
@@ -26,13 +27,39 @@ export default function Player() {
   }, [g?.playUrl])
   const cloud = useCloudSync(g && owned && g.playUrl ? g.id : undefined, frame, origin, g?.sdk ?? null)
   const [leaving, setLeaving] = useState(false)
-  // Like Steam: save to the cloud before the game closes.
+  const [closing, setClosing] = useState(false)
+  // Like Steam: save to the cloud before the game closes. The fade-out runs
+  // while that happens, so it doesn't add any waiting.
   const exit = async (to: string) => {
     const syncing = cloud.status === 'synced' || cloud.status === 'saving'
     if (syncing) setLeaving(true)
-    await cloud.flush()
+    const fade = motionOn()
+    if (fade) setClosing(true)
+    await Promise.all([cloud.flush(), fade ? new Promise((r) => setTimeout(r, 320)) : null])
     nav(to)
   }
+
+  // Launch screen: game art and a loading bar until the game's page has loaded
+  // (at least a moment, so it doesn't just flash; at most 8 s, in case the
+  // game never reports loading).
+  const [launch, setLaunch] = useState<'on' | 'fading' | 'off'>(() => (motionOn() ? 'on' : 'off'))
+  const [frameLoaded, setFrameLoaded] = useState(false)
+  const [minShown, setMinShown] = useState(false)
+  useEffect(() => {
+    if (launch !== 'on') return
+    const min = setTimeout(() => setMinShown(true), 1100)
+    const max = setTimeout(() => setLaunch('fading'), 8000)
+    return () => {
+      clearTimeout(min)
+      clearTimeout(max)
+    }
+  }, [launch])
+  useEffect(() => {
+    if (launch === 'on' && frameLoaded && minShown) setLaunch('fading')
+    if (launch !== 'fading') return
+    const t = setTimeout(() => setLaunch('off'), 450)
+    return () => clearTimeout(t)
+  }, [launch, frameLoaded, minShown])
 
   // Play time: count while this tab is visible.
   useEffect(() => {
@@ -103,8 +130,28 @@ export default function Player() {
   const session = (Date.now() - started.current) / 1000
 
   return (
-    <div className="player">
-      <iframe ref={frame} src={g.playUrl} title={g.title} allow="fullscreen; autoplay; gamepad; clipboard-write; pointer-lock; microphone; camera; screen-wake-lock" allowFullScreen />
+    <div className={`player ${closing ? 'closing' : ''}`}>
+      <iframe
+        ref={frame}
+        src={g.playUrl}
+        title={g.title}
+        onLoad={() => setFrameLoaded(true)}
+        allow="fullscreen; autoplay; gamepad; clipboard-write; pointer-lock; microphone; camera; screen-wake-lock"
+        allowFullScreen
+      />
+      {launch !== 'off' && (
+        <div className={`launch ${launch === 'fading' ? 'done' : ''}`} onClick={() => setLaunch('fading')}>
+          <div className="launch-bg" style={{ backgroundImage: `url(${g.images.hero || g.images.header})` }} />
+          <div className="launch-card">
+            <img src={g.images.header} alt="" />
+            <div className="launch-title">{g.title}</div>
+            <div className="launch-status">게임을 시작하는 중</div>
+            <div className="launch-bar">
+              <i />
+            </div>
+          </div>
+        </div>
+      )}
       {/* Keys pressed inside a game from another site never reach SKEAM, so
           Shift+Tab can't be relied on. This corner button always works. */}
       <div className="overlay-fab">

@@ -4,10 +4,11 @@
 // so there's no video file to download and it stays sharp at any size.
 //
 // Plays once per visit (tab session), and again for each new visitor in
-// exhibition mode. Any click, key or tap skips it. ?intro in the address
-// replays it on purpose.
+// exhibition mode. Any click, key or tap skips it. "애니메이션 끄기" in the
+// account menu turns it off. ?intro in the address replays it on purpose.
 
 import { useEffect, useState } from 'react'
+import { motionOn } from '../state/motion'
 
 const SEEN = 'skeam:intro'
 const LENGTH_MS = 3300
@@ -15,7 +16,7 @@ const EVENT = 'skeam:intro'
 
 function firstTimeThisVisit() {
   if (new URLSearchParams(location.search).has('intro')) return true
-  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return false
+  if (!motionOn()) return false
   try {
     if (sessionStorage.getItem(SEEN)) return false
     sessionStorage.setItem(SEEN, '1')
@@ -90,6 +91,7 @@ export function Intro() {
 
   useEffect(() => {
     const again = () => {
+      if (!motionOn()) return
       setLeaving(false)
       setRun((n) => n + 1)
     }

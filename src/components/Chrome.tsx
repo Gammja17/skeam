@@ -4,6 +4,7 @@ import { useData } from '../data/api'
 import { walletWon } from '../format'
 import { login, logout, signup } from '../state/account'
 import { exportData, importData, markNewsSeen, markReleaseSeen, markReviewsSeen, resetForNextVisitor, setKiosk, setProfile, useStore } from '../state/store'
+import { setMotion, useMotionSetting } from '../state/motion'
 import { playIntro } from './Intro'
 import { Avatar, AVATAR_COUNT, Modal, toast } from './ui'
 
@@ -293,6 +294,7 @@ export function Chrome() {
 function AccountMenu({ name, close }: { name: string; close: () => void }) {
   const kiosk = useStore((s) => s.kiosk)
   const session = useStore((s) => s.session)
+  const motion = useMotionSetting()
   const fileRef = useRef<HTMLInputElement>(null)
   const item = { display: 'block', width: '100%', padding: '7px 14px', background: 'none', border: 'none', color: '#dcdedf', textAlign: 'left' as const, fontSize: 13 }
 
@@ -326,6 +328,16 @@ function AccountMenu({ name, close }: { name: string; close: () => void }) {
         }}
       >
         전시회 모드 {kiosk ? '끄기' : '켜기'}
+      </button>
+      <button
+        style={item}
+        title="시작 애니메이션과 화면 전환, 게임 실행·종료 애니메이션 (이 기기에만 적용)"
+        onClick={() => {
+          setMotion(!motion)
+          close()
+        }}
+      >
+        애니메이션 {motion ? '끄기' : '켜기'}
       </button>
       <button style={item} onClick={download}>
         내 데이터 내보내기

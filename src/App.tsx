@@ -26,6 +26,15 @@ function ScrollTop() {
   return null
 }
 
+/**
+ * Which "screen" a path is, for the page-change animation: every store page is
+ * its own, but picking another game inside the library isn't a new screen
+ * (the sidebar shouldn't flash).
+ */
+function screenOf(pathname: string) {
+  return pathname.startsWith('/library') ? '/library' : pathname
+}
+
 function Shell() {
   const { pathname } = useLocation()
   const playing = pathname.startsWith('/play/')
@@ -33,25 +42,30 @@ function Shell() {
     <div className="app-shell">
       {!playing && <Chrome />}
       <ScrollTop />
-      <Suspense fallback={<Loading />}>
-        <Routes>
-          <Route path="/" element={<StoreHome />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/wishlist" element={<Search wishlistOnly />} />
-          <Route path="/app/:id" element={<AppPage />} />
-          <Route path="/checkout/:id" element={<Checkout />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/library/:id" element={<Library />} />
-          <Route path="/play/:id" element={<Player />} />
-          <Route path="/community" element={<Community />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/developer/:name" element={<Developer />} />
-          <Route path="/tags" element={<Tags />} />
-          <Route path="*" element={<StoreHome />} />
-        </Routes>
-      </Suspense>
+      {/* Remounting on a new screen replays the fade-in (.page-in in global.css).
+          The player has its own launch screen, and a transform here would
+          trap its fixed-position layout, so it isn't animated. */}
+      <div key={screenOf(pathname)} className={playing ? 'screen' : 'screen page-in'}>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<StoreHome />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/wishlist" element={<Search wishlistOnly />} />
+            <Route path="/app/:id" element={<AppPage />} />
+            <Route path="/checkout/:id" element={<Checkout />} />
+            <Route path="/wallet" element={<Wallet />} />
+            <Route path="/library" element={<Library />} />
+            <Route path="/library/:id" element={<Library />} />
+            <Route path="/play/:id" element={<Player />} />
+            <Route path="/community" element={<Community />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/developer/:name" element={<Developer />} />
+            <Route path="/tags" element={<Tags />} />
+            <Route path="*" element={<StoreHome />} />
+          </Routes>
+        </Suspense>
+      </div>
       {!playing && <BottomBar />}
       <ProfileGate />
       <KioskWatcher />

@@ -265,8 +265,8 @@ function Picks({ picks, by }: { picks: { id: string; note: string; game: Game }[
 }
 
 const TABS = [
-  { key: 'new', label: '인기 신규 출시 게임', more: '/search?sort=new' },
   { key: 'top', label: '이번 주 인기 게임', more: '/search?sort=top' },
+  { key: 'new', label: '인기 신규 출시 게임', more: '/search?sort=new' },
   { key: 'soon', label: '인기 출시 예정 게임', more: '/search?soon=1' },
   { key: 'web', label: '브라우저에서 플레이', more: '/search?platform=web' },
   { key: 'win', label: 'Windows 게임', more: '/search?platform=windows' },
@@ -280,7 +280,7 @@ const TAB_MAX = 10
 const NEW_DAYS = 30
 
 function TabbedList({ games }: { games: Game[] }) {
-  const [tab, setTab] = useState<(typeof TABS)[number]['key']>('new')
+  const [tab, setTab] = useState<(typeof TABS)[number]['key']>('top')
   const stats = useStats()
   const all = useMemo(() => {
     if (tab === 'soon')
