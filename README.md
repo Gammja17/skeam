@@ -18,8 +18,8 @@ git에 익숙하면 `games/<게임id>/` 폴더를 추가하는 PR을 보내도 �
 | --- | --- |
 | `games/<id>/` | 게임 하나: `game.yml`, `about.md`, `header.jpg`, `capsule.jpg`, `hero.jpg`, `screenshots/`, `achievements/`, `news/` |
 | `club/` | 커뮤니티 탭의 동아리 소개 (`club.yml`, `about.md`, `photos/`) |
-| `site.yml` | 홈 캐러셀에 걸 게임, 등록 창구 주소 |
-| `scripts/build-data.mjs` | 위 파일들을 검사해 `public/data/*.json`으로 만듦. 문제 있는 게임은 빼고 이유를 남김 |
+| `site.yml` | 홈 캐러셀에 걸 게임, 운영자 추천(`picks`), 운영자 |
+| `scripts/build-data.mjs` | 위 파일들을 검사해 `public/data/*.json`으로 만듦. 문제 있는 게임은 빼고 이유를 남김. 카톡·디스코드 링크 카드용 게임별 페이지(`app/<id>/`)도 만듦 |
 | `apps-script/` | 등록 창구와 리뷰를 맡는 Google Apps Script. 설정법은 `apps-script/README.md` |
 | `public/skeam-sdk.js` | HTML 게임용 SDK: 도전 과제, 오버레이, 클라우드 저장(`<head>`에 넣으면 localStorage·IndexedDB 세이브가 계정을 따라감) |
 | `.github/workflows/deploy.yml` | push, 매시간, 등록 창구 요청 때 빌드해서 Pages에 배포 |

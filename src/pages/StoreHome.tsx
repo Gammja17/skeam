@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom'
 import { StoreNav } from '../components/StoreNav'
 import { Loading, Price } from '../components/ui'
 import { useData } from '../data/api'
+import { byPopularity, useStats, weekLine } from '../data/stats'
 import { koDate, koRelease } from '../format'
 import { useStore } from '../state/store'
-import type { Game } from '../types'
+import type { Game, Site } from '../types'
 
 export default function StoreHome() {
   const { data, error } = useData()
@@ -14,7 +15,7 @@ export default function StoreHome() {
       <div className="store-wrap">
         <StoreNav />
         {error && <div className="notice err">게임 목록을 불러오지 못했습니다: {error}</div>}
-        {!data ? <Loading /> : data.games.length === 0 ? <Empty /> : <Home games={data.games} featuredIds={data.site.featured} />}
+        {!data ? <Loading /> : data.games.length === 0 ? <Empty /> : <Home games={data.games} site={data.site} />}
       </div>
     </div>
   )
@@ -31,7 +32,11 @@ function Empty() {
   )
 }
 
-function Home({ games, featuredIds }: { games: Game[]; featuredIds: string[] }) {
+function Home({ games, site }: { games: Game[]; site: Site }) {
+  const featuredIds = site.featured
+  // site.yml picks, with the admin's note (older data builds have none).
+  const picks = useMemo(() => (site.picks ?? []).map((p) => ({ ...p, game: games.find((g) => g.id === p.id)! })).filter((p) => p.game), [site, games])
+  const notes = useMemo(() => Object.fromEntries(picks.map((p) => [p.id, p.note])), [picks])
   const byNew = useMemo(() => [...games].sort((a, b) => b.release.localeCompare(a.release)), [games])
   // Pinned games in site.yml come first; everything else is shuffled on every visit.
   const featured = useMemo(() => {
@@ -50,7 +55,7 @@ function Home({ games, featuredIds }: { games: Game[]; featuredIds: string[] }) 
           지갑에 자금 추가
         </Link>
       </div>
-      <Carousel games={featured} />
+      <Carousel games={featured} notes={notes} />
 
       <div className="section-head">
         <h2>{deals.length ? '할인 및 이벤트' : '새로 올라온 게임'}</h2>
@@ -59,6 +64,8 @@ function Home({ games, featuredIds }: { games: Game[]; featuredIds: string[] }) 
         </Link>
       </div>
       <Deals games={dealsOrNew.slice(0, 12)} />
+
+      {picks.length > 0 && <Picks picks={picks} by={site.admins[0] ?? '운영자'} />}
 
       <TabbedList games={games} />
 
@@ -76,7 +83,7 @@ function shuffle<T>(xs: T[]): T[] {
   return a
 }
 
-function Carousel({ games: initial }: { games: Game[] }) {
+function Carousel({ games: initial, notes }: { games: Game[]; notes: Record<string, string> }) {
   // After a full lap the order is shuffled again, so it never repeats the same way.
   const [games, setGames] = useState(initial)
   useEffect(() => {
@@ -127,7 +134,7 @@ function Carousel({ games: initial }: { games: Game[] }) {
             ))}
           </div>
           <div className="reason">
-            <FeatureReason g={g} />
+            <FeatureReason g={g} note={notes[g.id]} />
           </div>
           <div className="price-row">
             <Price game={g} />
@@ -148,8 +155,15 @@ function Carousel({ games: initial }: { games: Game[] }) {
   )
 }
 
-function FeatureReason({ g }: { g: Game }) {
+function FeatureReason({ g, note }: { g: Game; note?: string }) {
   const owned = useStore((s) => !!s.owned[g.id])
+  if (note !== undefined && !g.comingSoon)
+    return (
+      <div>
+        <b>운영자 추천</b>
+        {note || `${g.developer} 제작`}
+      </div>
+    )
   if (g.comingSoon)
     return (
       <div>
@@ -223,23 +237,64 @@ function Deals({ games }: { games: Game[] }) {
   )
 }
 
+/** 운영자 추천: the admin's picks from site.yml, each with a short note, like Steam's curator reviews. */
+function Picks({ picks, by }: { picks: { id: string; note: string; game: Game }[]; by: string }) {
+  return (
+    <>
+      <div className="section-head">
+        <h2>운영자 추천</h2>
+      </div>
+      {/* Same card width as the deals row above when there are only a few. */}
+      <div className="picks" style={{ '--cols': Math.max(3, Math.min(4, picks.length)) } as React.CSSProperties}>
+        {picks.slice(0, 4).map(({ id, note, game: g }) => (
+          <Link key={id} className="pick" to={`/app/${id}`}>
+            <img src={g.images.header} alt="" />
+            <div className="body">
+              <span className="title">{g.title}</span>
+              {note && <p className="note">“{note}”</p>}
+              <div className="foot">
+                <span className="by">{by} 추천</span>
+                <Price game={g} />
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </>
+  )
+}
+
 const TABS = [
-  { key: 'new', label: '인기 신규 출시 게임' },
-  { key: 'soon', label: '인기 출시 예정 게임' },
-  { key: 'web', label: '브라우저에서 플레이' },
-  { key: 'win', label: 'Windows 게임' },
-  { key: 'sale', label: '특별 할인' },
-  { key: 'free', label: '주목받는 무료 게임' },
+  { key: 'new', label: '인기 신규 출시 게임', more: '/search?sort=new' },
+  { key: 'top', label: '이번 주 인기 게임', more: '/search?sort=top' },
+  { key: 'soon', label: '인기 출시 예정 게임', more: '/search?soon=1' },
+  { key: 'web', label: '브라우저에서 플레이', more: '/search?platform=web' },
+  { key: 'win', label: 'Windows 게임', more: '/search?platform=windows' },
+  { key: 'sale', label: '특별 할인', more: '/search?sale=1' },
+  { key: 'free', label: '주목받는 무료 게임', more: '/search?price=free' },
 ] as const
+
+/** Like Steam, each tab shows ten games; the rest are one "더 보기" away. */
+const TAB_MAX = 10
+/** "신규" means out within the last 30 days (at least the 5 newest, so the tab is never empty). */
+const NEW_DAYS = 30
 
 function TabbedList({ games }: { games: Game[] }) {
   const [tab, setTab] = useState<(typeof TABS)[number]['key']>('new')
-  const list = useMemo(() => {
+  const stats = useStats()
+  const all = useMemo(() => {
     if (tab === 'soon')
       // Soonest first; "미정" at the end.
       return games.filter((g) => g.comingSoon).sort((a, b) => (a.release || '9999').localeCompare(b.release || '9999'))
     const sorted = games.filter((g) => !g.comingSoon).sort((a, b) => b.release.localeCompare(a.release))
     switch (tab) {
+      case 'new': {
+        const since = new Date(Date.now() - NEW_DAYS * 86400000).toISOString().slice(0, 10)
+        const recent = sorted.filter((g, i) => g.release >= since || i < 5)
+        return byPopularity(recent, stats)
+      }
+      case 'top':
+        return byPopularity(sorted, stats)
       case 'web':
         return sorted.filter((g) => g.platform !== 'windows')
       case 'win':
@@ -251,7 +306,9 @@ function TabbedList({ games }: { games: Game[] }) {
       default:
         return sorted
     }
-  }, [games, tab])
+  }, [games, tab, stats])
+  const list = all.slice(0, TAB_MAX)
+  const more = TABS.find((t) => t.key === tab)!.more
   const [hover, setHover] = useState(0)
   useEffect(() => {
     setHover(0)
@@ -276,11 +333,18 @@ function TabbedList({ games }: { games: Game[] }) {
               <div>
                 <div className="t">{g.title}</div>
                 <div className="tags">{g.tags.join(', ')}</div>
-                <div className="rel">{g.comingSoon ? `출시 예정: ${koRelease(g.release)}` : `출시: ${koDate(g.release)}`}</div>
+                <div className="rel">{tab === 'top' ? weekLine(stats, g) : g.comingSoon ? `출시 예정: ${koRelease(g.release)}` : `출시: ${koDate(g.release)}`}</div>
               </div>
               <Price game={g} />
             </Link>
           ))}
+          {all.length > TAB_MAX && (
+            <div className="tab-more">
+              <Link className="btn-more" to={more}>
+                더 보기 ({all.length}개)
+              </Link>
+            </div>
+          )}
         </div>
         {pv && (
           // The inner box is absolutely positioned, so however many screenshots

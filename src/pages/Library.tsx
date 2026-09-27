@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { newsKey } from '../components/Chrome'
 import { Loading, Modal, toast } from '../components/ui'
 import { useData } from '../data/api'
+import { achievementRate, achievementTitle, isRare, pct, useStats } from '../data/stats'
 import { hours, koDate, shortDate } from '../format'
 import { listCloud, revertCloud, useRememberedCloud, type CloudStatus, type CloudVersion } from '../state/cloud'
 import { markLaunched, markNewsSeen, NONE, unlockAchievement, useStore, type Owned } from '../state/store'
@@ -400,6 +401,8 @@ function CloudCard({ g }: { g: Game }) {
 function Achievements({ g, achieved }: { g: Game; achieved: Record<string, number> }) {
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState('')
+  const [asList, setAsList] = useState(false)
+  const stats = useStats()[g.id]
   const got = g.achievements.filter((a) => achieved[a.id])
   const hasCodes = g.achievements.some((a) => a.code)
   // Show the game's own code shape, e.g. "RKT-XXXX".
@@ -415,20 +418,51 @@ function Achievements({ g, achieved }: { g: Game; achieved: Record<string, numbe
   }
   return (
     <div className="lib-card">
-      <h4>도전 과제</h4>
+      <div className="ach-head">
+        <h4>도전 과제</h4>
+        <button className="link-btn" onClick={() => setAsList((v) => !v)}>
+          {asList ? '아이콘으로 보기' : '목록으로 보기'}
+        </button>
+      </div>
       <div>
         {got.length}개 달성 / 전체 {g.achievements.length}개 ({Math.round((got.length / g.achievements.length) * 100)}%)
       </div>
       <div className="ach-bar">
         <div style={{ width: `${(got.length / g.achievements.length) * 100}%` }} />
       </div>
-      <div className="ach-grid">
-        {g.achievements.map((a) => (
-          <div key={a.id} className={`ach-icon ${achieved[a.id] ? '' : 'locked'}`} title={`${a.name}\n${a.desc}${achieved[a.id] ? `\n${shortDate(achieved[a.id])} 달성` : ''}`}>
-            {a.icon ? <img src={a.icon} alt="" /> : '🏆'}
-          </div>
-        ))}
-      </div>
+      {asList ? (
+        <div className="ach-list">
+          {g.achievements.map((a) => {
+            const r = achievementRate(stats, a.id)
+            return (
+              <div key={a.id} className={`ach-row ${achieved[a.id] ? '' : 'locked'}`}>
+                <div className={`ach-icon ${achieved[a.id] ? '' : 'locked'} ${isRare(stats, a.id) ? 'rare' : ''}`}>{a.icon ? <img src={a.icon} alt="" /> : '🏆'}</div>
+                <div className="txt">
+                  <b>{a.name}</b>
+                  <span>{a.desc}</span>
+                  {achieved[a.id] && <span className="when">{shortDate(achieved[a.id])} 달성</span>}
+                </div>
+                {r !== null && (
+                  <div className="rate" title={`이 게임을 가진 동아리원 ${stats!.owners}명 중 ${stats!.ach[a.id] ?? 0}명 달성`}>
+                    {pct(r)}
+                    <i>
+                      <em style={{ width: `${r}%` }} />
+                    </i>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="ach-grid">
+          {g.achievements.map((a) => (
+            <div key={a.id} className={`ach-icon ${achieved[a.id] ? '' : 'locked'} ${isRare(stats, a.id) ? 'rare' : ''}`} title={achievementTitle(a, stats, achieved[a.id] ? `${shortDate(achieved[a.id])} 달성` : '')}>
+              {a.icon ? <img src={a.icon} alt="" /> : '🏆'}
+            </div>
+          ))}
+        </div>
+      )}
       {hasCodes && (
         <div style={{ marginTop: 12 }}>
           <div style={{ fontSize: 12, marginBottom: 2 }}>도전 과제 코드 입력 (Windows판)</div>

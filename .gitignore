@@ -9,3 +9,6 @@ _shots
 # SKEAM 클라우드 시험대 (tools/cloud-test/setup.mjs on 이 만드는 것)
 public/__cloudtest/
 games/zz-cloudtest-*/
+
+# 링크 카드용 게임별 페이지 (build-data가 만듦)
+public/app

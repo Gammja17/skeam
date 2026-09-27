@@ -4,9 +4,10 @@ import { Reviews, reviewLabel, useReviews } from '../components/Reviews'
 import { StoreNav } from '../components/StoreNav'
 import { Loading, Price, Tags } from '../components/ui'
 import { useGame } from '../data/api'
+import { achievementTitle, isRare, useStats } from '../data/stats'
 import { koDate, koRelease, platformText } from '../format'
 import { NONE, toggleWishlist, useStore } from '../state/store'
-import type { Game } from '../types'
+import type { Game, Site } from '../types'
 import { developerPath } from './Developer'
 
 function youtubeId(url: string) {
@@ -41,14 +42,17 @@ export default function AppPage() {
             <Link to="/">상점으로 돌아가기</Link>
           </div>
         ) : (
-          <App g={game} endpoint={data.site.registerEndpoint} />
+          <App g={game} site={data.site} />
         )}
       </div>
     </div>
   )
 }
 
-function App({ g, endpoint }: { g: Game; endpoint: string }) {
+function App({ g, site }: { g: Game; site: Site }) {
+  const endpoint = site.registerEndpoint
+  const pick = site.picks?.find((p) => p.id === g.id)
+  const stats = useStats()[g.id]
   const { reviews } = useReviews(endpoint, g.id)
   const label = reviews ? reviewLabel(reviews.filter((r) => r.recommend).length, reviews.length) : null
   const owned = useStore((s) => s.owned[g.id])
@@ -216,6 +220,13 @@ function App({ g, endpoint }: { g: Game; endpoint: string }) {
         </div>
 
         <aside>
+          {pick && (
+            <div className="side-block pick-note">
+              <h4>운영자 추천</h4>
+              {pick.note ? <p>“{pick.note}”</p> : <p>운영자가 추천하는 게임이에요.</p>}
+              <span className="by">{site.admins[0] ?? '운영자'}</span>
+            </div>
+          )}
           <div className="side-block">
             <div className="plat-badge">
               <span className="ico">{g.platform === 'windows' ? '⊞' : '◎'}</span>
@@ -230,7 +241,7 @@ function App({ g, endpoint }: { g: Game; endpoint: string }) {
               <h4>SKEAM 도전 과제 {g.achievements.length}개</h4>
               <div className="ach-grid">
                 {g.achievements.slice(0, 8).map((a) => (
-                  <div key={a.id} className={`ach-icon ${achieved[a.id] ? '' : 'locked'}`} title={`${a.name}\n${a.desc}`}>
+                  <div key={a.id} className={`ach-icon ${achieved[a.id] ? '' : 'locked'} ${isRare(stats, a.id) ? 'rare' : ''}`} title={achievementTitle(a, stats)}>
                     {a.icon ? <img src={a.icon} alt="" /> : '🏆'}
                   </div>
                 ))}
@@ -339,7 +350,9 @@ function Media({ g }: { g: Game }) {
 }
 
 function ShareBox({ g }: { g: Game }) {
-  const url = `${location.origin}${location.pathname}#/app/${g.id}`
+  // app/<id>/ is the page made for link cards (KakaoTalk, Discord): it shows the
+  // game's header, title and one-line pitch, then sends people to #/app/<id>.
+  const url = new URL(`app/${g.id}/`, location.href.split('#')[0]).href
   const [qr, setQr] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const toggleQr = async () => {

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { StoreNav } from '../components/StoreNav'
 import { Loading, Price } from '../components/ui'
 import { useData } from '../data/api'
+import { byPopularity, useStats, weekLine } from '../data/stats'
 import { koDate, koRelease, platformText } from '../format'
 import { useStore } from '../state/store'
 import type { Game } from '../types'
@@ -18,6 +19,8 @@ export default function Search({ wishlistOnly = false }: { wishlistOnly?: boolea
   const price = p.get('price') ?? ''
   const sale = p.get('sale') === '1'
   const soon = p.get('soon') === '1'
+  const top = p.get('sort') === 'top'
+  const stats = useStats()
 
   const tags = useMemo(() => [...new Set(data?.games.flatMap((g) => g.tags) ?? [])].sort(), [data])
 
@@ -34,8 +37,9 @@ export default function Search({ wishlistOnly = false }: { wishlistOnly?: boolea
     if (sale) gs = gs.filter((g) => g.discount > 0 && !g.comingSoon)
     if (soon) gs = gs.filter((g) => g.comingSoon)
     if (price === 'free') gs = gs.filter((g) => !g.comingSoon)
+    if (top) return byPopularity(gs.filter((g) => !g.comingSoon), stats)
     return gs.sort((a, b) => b.release.localeCompare(a.release))
-  }, [data, q, tag, dev, platform, price, sale, soon, wishlistOnly, wishlist])
+  }, [data, q, tag, dev, platform, price, sale, soon, wishlistOnly, wishlist, top, stats])
 
   const set = (k: string, v: string) => {
     const n = new URLSearchParams(p)
@@ -44,7 +48,7 @@ export default function Search({ wishlistOnly = false }: { wishlistOnly?: boolea
     setP(n)
   }
 
-  const heading = wishlistOnly ? '내 찜 목록' : tag ? `${tag} 게임` : dev ? `${dev}의 게임` : q ? `"${q}" 검색 결과` : '모든 게임'
+  const heading = wishlistOnly ? '내 찜 목록' : tag ? `${tag} 게임` : dev ? `${dev}의 게임` : q ? `"${q}" 검색 결과` : top ? '이번 주 인기 게임' : '모든 게임'
 
   return (
     <div className="store">
@@ -69,7 +73,7 @@ export default function Search({ wishlistOnly = false }: { wishlistOnly?: boolea
                       {platformText(g)} · {g.developer}
                     </div>
                   </div>
-                  <div style={{ fontSize: 12, color: '#8f98a0' }}>{g.comingSoon ? `출시 예정 · ${koRelease(g.release)}` : koDate(g.release)}</div>
+                  <div style={{ fontSize: 12, color: '#8f98a0' }}>{top ? weekLine(stats, g) : g.comingSoon ? `출시 예정 · ${koRelease(g.release)}` : koDate(g.release)}</div>
                   <Price game={g} />
                 </Link>
               ))}

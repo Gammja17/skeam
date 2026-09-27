@@ -62,7 +62,11 @@ export interface Club {
 
 export interface Site {
   builtAt: string
+  /** Where the site lives, e.g. https://kh32-7.github.io/skeam/ */
+  url: string
   featured: string[]
+  /** 운영자 추천 from site.yml, with the admin's one-line note. */
+  picks: { id: string; note: string }[]
   registerEndpoint: string
   repo: string
   problems: Record<string, string[]>

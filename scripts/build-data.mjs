@@ -24,6 +24,7 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace
 const STRICT = process.argv.includes('--strict')
 const OUT_DATA = path.join(ROOT, 'public', 'data')
 const OUT_IMG = path.join(ROOT, 'public', 'g')
+const OUT_SHARE = path.join(ROOT, 'public', 'app')
 
 // Markdown from creators ends up in the page as HTML: keep formatting, drop
 // scripts, event handlers and javascript: links.
@@ -360,9 +361,84 @@ function buildClub(games) {
   }
 }
 
+// Where the site lives, for link previews (they need absolute addresses).
+// On GitHub Actions this follows the repo, so moving it to the club org just works.
+function siteUrl(siteYml) {
+  const own = siteYml.url || process.env.SKEAM_SITE_URL
+  if (own) return String(own).replace(/\/?$/, '/')
+  const m = String(process.env.GITHUB_REPOSITORY ?? '').match(/^([^/]+)\/(.+)$/)
+  return m ? `https://${m[1].toLowerCase()}.github.io/${m[2]}/` : 'https://kh32-7.github.io/skeam/'
+}
+
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+function plainText(markdown) {
+  return String(markdown)
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/[#>*_`~|-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+/**
+ * app/<id>/index.html: a tiny page per game whose only job is the link card
+ * in KakaoTalk, Discord and the like. Those read the <meta> tags and never run
+ * scripts; a person opening the link runs the script and lands on the store page.
+ */
+function writeSharePage(g, base) {
+  const price = g.comingSoon ? '출시 예정' : g.finalPrice === 0 ? '무료' : `₩ ${g.finalPrice.toLocaleString('ko-KR')}${g.discount ? ` (-${g.discount}%)` : ''}`
+  const about = g.short || plainText(g.aboutMd).slice(0, 120)
+  const desc = `${about}${about ? '\n' : ''}${g.developer} 제작 · ${price}`
+  const url = `${base}app/${g.id}/`
+  const html = `<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>${esc(g.title)} | SKEAM</title>
+<meta name="description" content="${esc(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SKEAM">
+<meta property="og:title" content="${esc(g.title)}">
+<meta property="og:description" content="${esc(desc)}">
+<meta property="og:url" content="${esc(url)}">
+<meta property="og:image" content="${esc(base + g.images.header)}">
+<meta property="og:image:width" content="920">
+<meta property="og:image:height" content="430">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#66c0f4">
+<link rel="icon" type="image/svg+xml" href="../../skeam-icon.svg">
+<script>location.replace('../../#/app/${g.id}')</script>
+</head>
+<body style="background:#1b2838;color:#c7d5e0;font-family:sans-serif">
+<p><a style="color:#66c0f4" href="../../#/app/${g.id}">SKEAM에서 ${esc(g.title)} 보기</a></p>
+</body>
+</html>
+`
+  fs.mkdirSync(path.join(OUT_SHARE, g.id), { recursive: true })
+  fs.writeFileSync(path.join(OUT_SHARE, g.id, 'index.html'), html)
+}
+
+/** site.yml picks: `- id: celrush` + `note: "..."` (or just an id). */
+function readPicks(v, games) {
+  const out = []
+  for (const p of Array.isArray(v) ? v : []) {
+    const id = String(typeof p === 'object' && p ? p.id ?? '' : p ?? '').trim()
+    if (!id) continue
+    if (!games.some((g) => g.id === id)) {
+      problem('site.yml', `picks에 없는 게임 id: ${id}`)
+      continue
+    }
+    out.push({ id, note: typeof p === 'object' && p?.note ? String(p.note).trim().slice(0, 200) : '' })
+  }
+  return out
+}
+
 async function main() {
   rmrf(OUT_DATA)
   rmrf(OUT_IMG)
+  rmrf(OUT_SHARE)
   fs.mkdirSync(OUT_DATA, { recursive: true })
 
   const gamesDir = path.join(ROOT, 'games')
@@ -384,9 +460,14 @@ async function main() {
   const featured = asList(siteYml.featured).filter((id) => games.some((g) => g.id === id))
   for (const id of asList(siteYml.featured)) if (!games.some((g) => g.id === id)) problem('site.yml', `없는 게임 id: ${id}`)
 
+  const url = siteUrl(siteYml)
+  for (const g of games) writeSharePage(g, url)
+
   const site = {
     builtAt: new Date().toISOString(),
+    url,
     featured,
+    picks: readPicks(siteYml.picks, games),
     registerEndpoint: String(siteYml.register_endpoint ?? process.env.SKEAM_REGISTER_ENDPOINT ?? ''),
     repo: String(siteYml.repo ?? process.env.GITHUB_REPOSITORY ?? ''),
     problems: problemsById,

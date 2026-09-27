@@ -3338,3 +3338,169 @@ button.account-pill {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- 운영자 추천, tab "더 보기", achievement rarity ---------- */
+
+.picks {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  gap: 16px;
+}
+.pick {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #2a475e 0, #1b2838 100%);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  transition: transform 0.15s;
+}
+.pick:hover {
+  color: #fff;
+  transform: translateY(-2px);
+}
+.pick img {
+  width: 100%;
+  aspect-ratio: 920 / 430;
+  object-fit: cover;
+}
+.pick .body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px;
+}
+.pick .title {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pick .note {
+  margin: 0;
+  color: #acdbf5;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pick .foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+}
+.pick .by {
+  color: #8f98a0;
+  font-size: 12px;
+}
+.pick-note p {
+  margin: 0 0 6px;
+  color: #acdbf5;
+  font-style: italic;
+  line-height: 1.5;
+}
+.pick-note .by {
+  color: #8f98a0;
+  font-size: 12px;
+}
+.tab-more {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 0 0;
+}
+
+.ach-icon.rare {
+  border-color: #e0a526;
+  box-shadow: 0 0 0 1px #e0a526, 0 0 8px rgba(255, 200, 80, 0.45);
+}
+.ach-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #66c0f4;
+  font-size: 12px;
+  cursor: pointer;
+}
+.link-btn:hover {
+  color: #fff;
+}
+.ach-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+.ach-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.ach-row .ach-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+}
+.ach-row .txt {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12px;
+  color: #8f98a0;
+}
+.ach-row .txt b {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 500;
+}
+.ach-row.locked .txt b {
+  color: #acb2b8;
+}
+.ach-row .when {
+  color: #66c0f4;
+}
+.ach-row .rate {
+  flex: none;
+  width: 72px;
+  font-size: 12px;
+  color: #c7d5e0;
+  text-align: right;
+}
+.ach-row .rate i {
+  display: block;
+  height: 4px;
+  margin-top: 4px;
+  background: #1c2733;
+}
+.ach-row .rate em {
+  display: block;
+  height: 100%;
+  background: #66c0f4;
+}
+
+@media (max-width: 900px) {
+  .picks {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 700px) {
+  .picks {
+    grid-template-columns: 1fr;
+  }
+  .ach-row .rate {
+    width: 52px;
+  }
+}

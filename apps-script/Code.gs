@@ -5,7 +5,8 @@
  * commits the files to the SKEAM GitHub repo (which redeploys the site).
  * Reviews are stored in the "reviews" sheet of the spreadsheet this script
  * is attached to; accounts (nickname + password hash + synced data) in
- * "accounts"; status messages in "profiles"; web games' cloud saves in "saves".
+ * "accounts"; status messages in "profiles"; web games' cloud saves in "saves";
+ * play time added per day (for "이번 주 인기") in "plays".
  *
  * Forgotten password: clear that person's "hash" cell in the accounts sheet.
  * Their next login sets whatever password they type, and their data stays.
@@ -71,6 +72,7 @@ function doGet(e) {
   var p = (e && e.parameter) || {}
   if (p.action === 'reviews') return json(listReviews(p.game))
   if (p.action === 'profiles') return json(listProfiles())
+  if (p.action === 'stats') return json(stats())
   return json({ ok: true, service: 'SKEAM' })
 }
 
@@ -385,7 +387,13 @@ function saveData(req) {
   if (text.length > 45000) throw new Error('저장할 데이터가 너무 큽니다')
   var acc = findAccount(req.name)
   var at = new Date().toISOString()
+  var before = parseData(acc)
   acc.sh.getRange(acc.row, ACC.data, 1, 2).setValues([[text, at]])
+  try {
+    recordPlays(String(acc.v[ACC.lower - 1]), before, req.data || {})
+  } catch (e) {
+    // Popularity numbers are a nice-to-have; never fail a save over them.
+  }
   return { ok: true, updated: at }
 }
 
@@ -400,6 +408,130 @@ function logout(req) {
     ),
   )
   return { ok: true }
+}
+
+// ---- play stats (weekly popularity, achievement rarity) ---------------------------
+// Synced data only holds running totals, so each save also notes how much play
+// time it added, per day: "plays" sheet, day (yyyymmdd, KST) | lower | game | seconds.
+// One row per person, game and day; rows older than PLAYS_DAYS are dropped.
+
+var PLAYS_DAYS = 35
+var WEEK_CAP = 5 * 3600 // one person counts for at most 5 hours of a game per week
+
+function playSheet() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet()
+  var sh = ss.getSheetByName('plays')
+  if (!sh) {
+    sh = ss.insertSheet('plays')
+    sh.appendRow(['day', 'lower', 'game', 'seconds'])
+    sh.setFrozenRows(1)
+  }
+  return sh
+}
+
+function kstDay(ms) {
+  return Number(Utilities.formatDate(new Date(ms), 'Asia/Seoul', 'yyyyMMdd'))
+}
+
+function recordPlays(lower, before, after) {
+  var o0 = (before && before.owned) || {}
+  var o1 = (after && after.owned) || {}
+  var added = {}
+  Object.keys(o1).forEach(function (g) {
+    if (!ID_RE.test(g) || !o0[g]) return // a game new to this account brings its old total along; skip it
+    var sec = (Number((o1[g] || {}).playtime) || 0) - (Number(o0[g].playtime) || 0)
+    if (sec > 0) added[g] = Math.min(sec, 12 * 3600)
+  })
+  if (!Object.keys(added).length) return
+  var lock = LockService.getScriptLock()
+  if (!lock.tryLock(5000)) return
+  try {
+    var sh = playSheet()
+    var day = kstDay(Date.now())
+    var rows = sh.getDataRange().getValues()
+    // Today's rows are at the bottom; don't walk the whole sheet on every save.
+    for (var i = rows.length - 1; i >= 1 && Number(rows[i][0]) >= day; i--) {
+      var g = String(rows[i][2])
+      if (Number(rows[i][0]) === day && String(rows[i][1]) === lower && added[g]) {
+        sh.getRange(i + 1, 4).setValue((Number(rows[i][3]) || 0) + added[g])
+        delete added[g]
+      }
+    }
+    Object.keys(added).forEach(function (g) {
+      sh.appendRow([day, lower, g, added[g]])
+    })
+    // Once a day, drop what is too old to matter.
+    var cache = CacheService.getScriptCache()
+    if (cache.get('plays:pruned') !== String(day)) {
+      var cut = kstDay(Date.now() - PLAYS_DAYS * 86400e3)
+      var old = 0
+      while (old + 1 < rows.length && Number(rows[old + 1][0]) < cut) old++
+      if (old) sh.deleteRows(2, old)
+      cache.put('plays:pruned', String(day), 21600)
+    }
+  } finally {
+    lock.releaseLock()
+  }
+}
+
+/**
+ * Per game: owners, total play time, people who played / got it in the last 7
+ * days, play time in the last 7 days (capped per person), and how many owners
+ * have each achievement. Worked out from everyone's synced data; cached 10 min.
+ */
+function stats() {
+  var cache = CacheService.getScriptCache()
+  var hit = cache.get('stats:v1')
+  if (hit) return JSON.parse(hit)
+  var now = Date.now()
+  var week = now - 7 * 86400e3
+  var games = {}
+  var of = function (id) {
+    return games[id] || (games[id] = { owners: 0, total: 0, players: 0, newOwners: 0, week: 0, ach: {} })
+  }
+  accountSheet()
+    .getDataRange()
+    .getValues()
+    .slice(1)
+    .forEach(function (r) {
+      var d
+      try {
+        d = JSON.parse(r[ACC.data - 1] || '{}')
+      } catch (e) {
+        return
+      }
+      var owned = d.owned || {}
+      Object.keys(owned).forEach(function (id) {
+        if (!ID_RE.test(id)) return
+        var o = owned[id] || {}
+        var s = of(id)
+        s.owners++
+        s.total += Number(o.playtime) || 0
+        if ((Number(o.lastPlayed) || 0) >= week) s.players++
+        if ((Number(o.purchasedAt) || 0) >= week) s.newOwners++
+        var ach = (d.achievements || {})[id] || {}
+        Object.keys(ach).forEach(function (a) {
+          if (ach[a]) s.ach[a] = (s.ach[a] || 0) + 1
+        })
+      })
+    })
+  var since = kstDay(now - 6 * 86400e3) // today and the 6 days before
+  var perPerson = {}
+  playSheet()
+    .getDataRange()
+    .getValues()
+    .slice(1)
+    .forEach(function (r) {
+      if (Number(r[0]) < since || !ID_RE.test(String(r[2]))) return
+      var k = r[1] + '|' + r[2]
+      perPerson[k] = (perPerson[k] || 0) + (Number(r[3]) || 0)
+    })
+  Object.keys(perPerson).forEach(function (k) {
+    of(k.split('|')[1]).week += Math.min(perPerson[k], WEEK_CAP)
+  })
+  var out = { ok: true, at: new Date(now).toISOString(), games: games }
+  cache.put('stats:v1', JSON.stringify(out), 600)
+  return out
 }
 
 // ---- cloud saves ---------------------------------------------------------------------
