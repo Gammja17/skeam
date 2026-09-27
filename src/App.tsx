@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react'
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { BottomBar, Chrome, KioskWatcher, ProfileGate, ReleaseNotifier } from './components/Chrome'
+import { Intro } from './components/Intro'
 import { Loading, Toasts } from './components/ui'
 import { startSync } from './state/account'
 import AppPage from './pages/AppPage'
@@ -56,6 +57,7 @@ function Shell() {
       <KioskWatcher />
       <ReleaseNotifier />
       <Toasts />
+      <Intro />
     </div>
   )
 }

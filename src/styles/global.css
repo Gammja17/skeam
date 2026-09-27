@@ -3504,3 +3504,253 @@ button.account-pill {
     width: 52px;
   }
 }
+
+/* ---------- start-up animation (components/Intro.tsx) ---------- */
+/* Timeline, 3.3s: disc + ring 0.15-0.8 · rod and joints 0.7-1.1 · crown drops 1.15-1.55 ·
+   flash, pulse and shine 1.5-2.0 · name 1.75-2.3 · everything fades out 2.75-3.3 */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #070b11;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  animation: intro-out 0.55s ease-in 2.75s forwards;
+}
+.intro.leaving {
+  animation: intro-out 0.25s ease-in forwards;
+}
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+.intro-glow {
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(circle at 50% 45%, rgba(102, 192, 244, 0.28) 0, rgba(42, 71, 94, 0.18) 28%, transparent 60%);
+  opacity: 0;
+  animation: intro-glow 2.6s ease-out 0.1s forwards;
+}
+@keyframes intro-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  62% {
+    opacity: 1;
+    filter: brightness(1.8);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+.intro-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: intro-zoom 0.55s ease-in 2.75s forwards;
+}
+@keyframes intro-zoom {
+  to {
+    transform: scale(1.08);
+  }
+}
+.intro-mark {
+  width: min(44vmin, 280px);
+  height: min(44vmin, 280px);
+  overflow: visible;
+}
+.intro-mark * {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.intro .i-disc {
+  opacity: 0;
+  animation: i-disc 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.2) 0.15s forwards;
+}
+@keyframes i-disc {
+  from {
+    opacity: 0;
+    transform: scale(0.4) rotate(-40deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.intro .i-ring {
+  fill: none;
+  stroke: #c7d5e0;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  /* real lengths, not pathLength: older iOS Safari ignores pathLength on <circle> */
+  stroke-dasharray: 158;
+  stroke-dashoffset: 158;
+  transform: rotate(-90deg);
+  animation: i-draw 0.6s ease-in-out 0.25s forwards;
+}
+.intro .i-rod {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 5.2;
+  stroke-linecap: round;
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  animation: i-draw 0.3s ease-out 0.78s forwards;
+}
+@keyframes i-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.intro .i-small,
+.intro .i-big {
+  opacity: 0;
+  animation: i-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) forwards;
+}
+.intro .i-small {
+  animation-delay: 0.7s;
+}
+.intro .i-big {
+  animation-delay: 0.98s;
+}
+@keyframes i-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.intro .i-crown {
+  opacity: 0;
+  animation: i-crown 0.5s cubic-bezier(0.25, 1.5, 0.5, 1) 1.15s forwards;
+}
+@keyframes i-crown {
+  0% {
+    opacity: 0;
+    transform: translateY(-26px) rotate(-8deg) scale(1.2);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.intro .i-gem {
+  animation: i-twinkle 0.5s ease-out 1.6s;
+}
+.intro .i-gem:nth-of-type(2) {
+  animation-delay: 1.68s;
+}
+.intro .i-gem:nth-of-type(3) {
+  animation-delay: 1.76s;
+}
+@keyframes i-twinkle {
+  50% {
+    fill: #fff;
+    transform: scale(1.8);
+  }
+}
+.intro .i-pulse {
+  fill: none;
+  stroke: #66c0f4;
+  stroke-width: 1.2;
+  opacity: 0;
+  animation: i-pulse 0.9s ease-out 1.5s forwards;
+}
+@keyframes i-pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+.intro .i-shine {
+  transform-box: view-box;
+  transform-origin: 0 0;
+  animation: i-shine 0.6s ease-in-out 1.55s forwards;
+}
+@keyframes i-shine {
+  from {
+    transform: skewX(-20deg) translateX(0);
+  }
+  to {
+    transform: skewX(-20deg) translateX(120px);
+  }
+}
+.intro-word {
+  display: flex;
+  margin-top: min(3vmin, 18px);
+  font-size: min(15vmin, 96px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+.intro-word span {
+  display: inline-block;
+  opacity: 0;
+  animation: i-letter 0.45s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+}
+@keyframes i-letter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    text-shadow: 0 0 24px rgba(102, 192, 244, 0.45);
+  }
+}
+.intro-tag {
+  margin-top: min(2.5vmin, 14px);
+  /* the trailing letter-spacing would push the word off center */
+  padding-left: 0.5em;
+  font-size: min(4.6vmin, 24px);
+  font-weight: 700;
+  letter-spacing: 0.5em;
+  color: #66c0f4;
+  opacity: 0;
+  animation: i-tag 0.5s ease-out 2.15s forwards;
+}
+@keyframes i-tag {
+  from {
+    opacity: 0;
+    letter-spacing: 1.1em;
+    padding-left: 1.1em;
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0.5em;
+    padding-left: 0.5em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    display: none;
+  }
+}

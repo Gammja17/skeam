@@ -4,6 +4,7 @@ import { useData } from '../data/api'
 import { walletWon } from '../format'
 import { login, logout, signup } from '../state/account'
 import { exportData, importData, markNewsSeen, markReleaseSeen, markReviewsSeen, resetForNextVisitor, setKiosk, setProfile, useStore } from '../state/store'
+import { playIntro } from './Intro'
 import { Avatar, AVATAR_COUNT, Modal, toast } from './ui'
 
 export function newsKey(n: { date: string; title: string }) {
@@ -559,6 +560,7 @@ export function KioskWatcher() {
         if (window.location.hash.startsWith('#/play/')) return arm()
         resetForNextVisitor()
         nav('/')
+        playIntro()
       }, 3 * 60 * 1000)
     }
     const evs = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'wheel']
