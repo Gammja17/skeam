@@ -1,0 +1,15 @@
+title: "왁뿌 말랑이 가게 (Demo)"
+title_en: "WAKKPU Squishy Shop (Demo)"
+developer: "RURUISRYU"
+release: 2026-09-28
+price: 19000
+discount: 20
+play_url: "https://ruruisryu.github.io/WAKKPU_demo/clicker/v0.8.0/"
+tags: ["아이들러", "캐주얼", "릴랙싱", "방치형", "증분형"]
+short: "왁스를 직접 부수는 손맛과 일꾼을 배치해 말랑이 가게를 키워가는 방치형 클리커 게임입니다."
+controls: "마우스 클릭 및 드래그"
+ai_tools: ["claude code", "codex"]
+dev_period: "3일"
+ai_note: "밸런스도 아직 안잡은 부족한 게임인데 곧 업데이트해서 다시 올릴게요"
+engine: "HTML/JavaScript"
+updated: "2026-09-28T16:39:30.099Z"
