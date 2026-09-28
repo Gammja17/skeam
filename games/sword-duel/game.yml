@@ -1,0 +1,13 @@
+title: "진검승부"
+title_en: "SWORD DUEL"
+developer: "gamzuha"
+release: 2026-09-29
+price: 3000
+play_url: "https://gammja17.github.io/SwordDuel/"
+version: "1.0.0"
+tags: ["액션", "1인칭", "검술", "결투", "소울라이크", "중세", "고난이도", "싱글 플레이어"]
+short: "마우스로 칼을 직접 휘두르는 1인칭 롱소드 결투. 쳐내고, 구르고, 틈이 보이면 처형하라."
+controls: "마우스로 칼 휘두르기, 좌클릭 크게 베기, 우클릭 막기와 쳐내기, WASD 이동, 스페이스 구르기, E 치명타와 처형, 휠 클릭 락온"
+ai_tools: ["Claude Code"]
+dev_period: "4일"
+engine: "Godot 4.7 (Compatibility, Web)"
