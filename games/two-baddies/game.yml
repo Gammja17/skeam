@@ -6,7 +6,7 @@ price: 3000
 play_url: "https://gammja17.github.io/TwoBaddies/"
 version: "1.0.0"
 tags: ["퍼즐", "풍부한 스토리", "미스터리 및 추리", "분위기 있는", "잠입", "블랙 코미디", "멀티 엔딩", "픽셀 그래픽"]
-short: "빈 별장을 털러 들어간 좀도둑, 그 집에 먼저 숨어 있던 수배범. 경찰이 오기까지 20분, 같이 나갈까 먼저 칠까?"
+short: "좀도둑이 빈 별장을 털러 들어갔다가 방범 장치에 갇혀 버렸다. 경찰이 오기까지 20분, 쯔꾸르풍 방탈출."
 controls: "방향키 또는 WASD 걷기, Shift 뛰기, Z 조사와 대화, X 취소, C 주머니, M 메모장, Esc 멈춤 / 휴대폰은 화면 버튼"
 ai_tools: ["Claude Code", "VARCO"]
 dev_period: "1일"
