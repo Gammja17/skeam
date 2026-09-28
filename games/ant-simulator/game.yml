@@ -1,0 +1,16 @@
+title: "개미 시뮬레이터"
+title_en: "Ant Simulator"
+developer: "MK"
+release: 2026-09-28
+price: 9.99999999e+29
+discount: 99.99999999999999
+repo: "https://github.com/AntSimulator/AntSimulator"
+version: "1.0.0"
+tags: ["샌드박스 및 물리 시뮬레이션", "생활 및 몰입형 시뮬레이션", "취미 및 직업 시뮬레이션", "캐주얼"]
+short: "개미가 되어 주식으로 돈벌자 "
+controls: "클릭"
+ai_tools: ["다양함"]
+dev_period: "두달?"
+ai_note: "개미시뮬 갓겜입니다~!"
+engine: "유니티"
+updated: "2026-09-28T05:26:35.330Z"
